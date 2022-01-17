@@ -75,6 +75,7 @@
 #include <libsolutil/IpfsHash.h>
 #include <libsolutil/JSON.h>
 #include <libsolutil/Algorithms.h>
+#include <libsolutil/FunctionSelector.h>
 
 #include <json/json.h>
 
@@ -1022,6 +1023,34 @@ Json::Value CompilerStack::methodIdentifiers(string const& _contractName) const
 	for (auto const& it: contractDefinition(_contractName).interfaceFunctions())
 		methodIdentifiers[it.second->externalSignature()] = it.first.hex();
 	return methodIdentifiers;
+}
+
+Json::Value CompilerStack::errorIdentifiers(string const& _contractName) const
+{
+	if (m_stackState < AnalysisPerformed)
+		solThrow(CompilerError, "Analysis was not successful.");
+
+	Json::Value errorIdentifiers(Json::objectValue);
+	for (auto const& it: contractDefinition(_contractName).interfaceErrors()) {
+		string signature = it->functionType(true)->externalSignature();
+		errorIdentifiers[signature] = toHex(toCompactBigEndian(selectorFromSignature32(signature), 4));
+	}
+
+	return errorIdentifiers;
+}
+
+Json::Value CompilerStack::eventIdentifiers(string const& _contractName) const
+{
+	if (m_stackState < AnalysisPerformed)
+		solThrow(CompilerError, "Analysis was not successful.");
+
+	Json::Value eventIdentifiers(Json::objectValue);
+	for (auto const& it: contractDefinition(_contractName).interfaceEvents()) {
+		string signature = it->functionType(true)->externalSignature();
+		eventIdentifiers[signature] = toHex(toCompactBigEndian(selectorFromSignature32(signature), 4));
+	}
+
+	return eventIdentifiers;
 }
 
 bytes CompilerStack::cborMetadata(string const& _contractName, bool _forIR) const
