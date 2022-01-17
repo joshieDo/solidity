@@ -64,7 +64,10 @@ function prb_math_test
     neutralize_package_json_hooks
     force_hardhat_compiler_binary "$config_file" "$BINARY_TYPE" "$BINARY_PATH"
     force_hardhat_compiler_settings "$config_file" "$(first_word "$SELECTED_PRESETS")" "$config_var"
-    yarn install --lock-file
+    yarn --version
+    yarn install --help
+    yarn install --no-lock-file
+    yarn install --no-immutable
 
     replace_version_pragmas
 
